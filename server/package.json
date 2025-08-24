@@ -1,7 +1,7 @@
 {
-  "name": "vibe-slack-server",
+  "name": "eeg-vibe-slack-server",
   "version": "1.0.0",
-  "description": "Backend server for Vibe Slack",
+  "description": "Backend server for EEG Vibe Slack",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
