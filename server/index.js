@@ -8,6 +8,9 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Add a simple mutex for read status operations
+let readStatusMutex = Promise.resolve();
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -89,18 +92,37 @@ async function initializeData() {
 async function readJsonFile(filename) {
   try {
     const data = await fs.readFile(path.join(DATA_DIR, filename), 'utf8');
+    if (!data.trim()) {
+      console.log(`${filename} is empty, returning default array`);
+      return [];
+    }
     return JSON.parse(data);
   } catch (error) {
     console.error(`Error reading ${filename}:`, error);
+    
+    // For user_read_status.json, try to return existing data if possible
+    if (filename === 'user_read_status.json') {
+      try {
+        // Try to read the file again to see if it was a temporary issue
+        const data = await fs.readFile(path.join(DATA_DIR, filename), 'utf8');
+        return JSON.parse(data);
+      } catch (secondError) {
+        console.error(`Second attempt to read ${filename} failed:`, secondError);
+        return [];
+      }
+    }
     return [];
   }
 }
 
 async function writeJsonFile(filename, data) {
   try {
-    await fs.writeFile(path.join(DATA_DIR, filename), JSON.stringify(data, null, 2));
+    const jsonString = JSON.stringify(data, null, 2);
+    await fs.writeFile(path.join(DATA_DIR, filename), jsonString, 'utf8');
+    console.log(`Successfully wrote ${filename}`);
   } catch (error) {
     console.error(`Error writing ${filename}:`, error);
+    throw error; // Re-throw to handle in calling function
   }
 }
 
@@ -332,33 +354,68 @@ app.get('/api/direct-messages/:userId', authenticateToken, async (req, res) => {
 
 // Helper functions for read status management
 async function updateReadStatus(userId, channelId, dmUserId, timestamp) {
-  try {
-    const readStatuses = await readJsonFile('user_read_status.json');
-    const chatKey = channelId ? `channel_${channelId}` : `dm_${dmUserId}`;
-    
-    // Find existing status or create new one
-    let userStatus = readStatuses.find(status => status.userId === userId);
-    if (!userStatus) {
-      userStatus = { userId, readTimestamps: {} };
-      readStatuses.push(userStatus);
+  // Use mutex to prevent concurrent access to read status file
+  readStatusMutex = readStatusMutex.then(async () => {
+    try {
+      console.log('updateReadStatus called:', { userId, channelId, dmUserId, timestamp });
+      const readStatuses = await readJsonFile('user_read_status.json');
+      const chatKey = channelId ? `channel_${channelId}` : `dm_${dmUserId}`;
+      console.log('Generated chat key:', chatKey);
+      
+      // Find existing status or create new one
+      let userStatus = readStatuses.find(status => status.userId === userId);
+      if (!userStatus) {
+        console.log('Creating new user status for:', userId);
+        userStatus = { userId, readTimestamps: {} };
+        readStatuses.push(userStatus);
+      }
+      
+      userStatus.readTimestamps[chatKey] = timestamp;
+      console.log('Updated read status:', userStatus.readTimestamps);
+      
+      // Retry write operation if it fails
+      let writeSuccess = false;
+      let retries = 3;
+      
+      while (!writeSuccess && retries > 0) {
+        try {
+          await writeJsonFile('user_read_status.json', readStatuses);
+          writeSuccess = true;
+          console.log('Read status saved to file');
+        } catch (writeError) {
+          console.error(`Write attempt failed, retries left: ${retries - 1}`, writeError);
+          retries--;
+          if (retries > 0) {
+            // Wait a bit before retrying
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+      }
+      
+      if (!writeSuccess) {
+        throw new Error('Failed to save read status after multiple attempts');
+      }
+    } catch (error) {
+      console.error('Error updating read status:', error);
+      throw error;
     }
-    
-    userStatus.readTimestamps[chatKey] = timestamp;
-    await writeJsonFile('user_read_status.json', readStatuses);
-  } catch (error) {
-    console.error('Error updating read status:', error);
-  }
+  });
+
+  return readStatusMutex;
 }
 
 async function getReadStatus(userId) {
-  try {
-    const readStatuses = await readJsonFile('user_read_status.json');
-    const userStatus = readStatuses.find(status => status.userId === userId);
-    return userStatus ? userStatus.readTimestamps : {};
-  } catch (error) {
-    console.error('Error getting read status:', error);
-    return {};
-  }
+  // Use mutex to prevent concurrent access to read status file
+  return readStatusMutex.then(async () => {
+    try {
+      const readStatuses = await readJsonFile('user_read_status.json');
+      const userStatus = readStatuses.find(status => status.userId === userId);
+      return userStatus ? userStatus.readTimestamps : {};
+    } catch (error) {
+      console.error('Error getting read status:', error);
+      return {};
+    }
+  });
 }
 
 // Socket.io events
@@ -388,6 +445,7 @@ io.on('connection', (socket) => {
   // Handle marking messages as read
   socket.on('mark_as_read', async (data) => {
     try {
+      console.log('mark_as_read event received:', data, 'from user:', socket.user.username);
       const { channelId, dmUserId } = data;
       const timestamp = new Date().toISOString();
       await updateReadStatus(socket.user.id, channelId, dmUserId, timestamp);
@@ -396,6 +454,7 @@ io.on('connection', (socket) => {
       // Send updated read status back to the user
       const key = channelId ? `channel_${channelId}` : `dm_${dmUserId}`;
       socket.emit('read_status_updated', { [key]: timestamp });
+      console.log('Sent read_status_updated event:', { [key]: timestamp });
     } catch (error) {
       console.error('Error marking as read:', error);
     }

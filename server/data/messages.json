@@ -190,5 +190,21 @@
     "senderName": "Test",
     "content": "new channels",
     "timestamp": "2025-08-24T09:16:45.402Z"
+  },
+  {
+    "id": "0cd17d9e-f3fa-4c0f-bfa2-db72433c4ab7",
+    "channelId": "2a9e224b-c930-4817-8679-b32c0b3015a7",
+    "senderId": "c093e7e0-e72e-47ed-9f5d-f01579742713",
+    "senderName": "Test",
+    "content": "asdfsdfsdf",
+    "timestamp": "2025-08-24T09:23:42.669Z"
+  },
+  {
+    "id": "54c4a396-b5a1-4800-bfe8-5b7e2327a339",
+    "channelId": "4bcb02fc-0c87-43aa-8c26-82e020cf6a6b",
+    "senderId": "5d174aaa-e446-4d89-9523-685694d96f6b",
+    "senderName": "EEG",
+    "content": "asdhfsdlfk",
+    "timestamp": "2025-08-24T09:31:45.199Z"
   }
 ]
