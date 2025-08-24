@@ -1,0 +1,14 @@
+{
+  // This is a project references configuration file for Vite
+  // Compiler options are defined in tsconfig.app.json and tsconfig.node.json
+  // eslint-disable-next-line
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

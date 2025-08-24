@@ -1,0 +1,26 @@
+[
+  {
+    "id": "dcf2b3e8-9329-4449-a71e-87f1aed372f5",
+    "username": "Mukesh",
+    "email": "m@ms.com",
+    "password": "$2a$10$mN7DzfQnWaxnsQJisC9s4.pBoJleCuiKk3WgFCIewbakSkVbevHWS",
+    "createdAt": "2025-08-24T07:19:03.348Z",
+    "isOnline": true
+  },
+  {
+    "id": "c093e7e0-e72e-47ed-9f5d-f01579742713",
+    "username": "Test",
+    "email": "test@ms.com",
+    "password": "$2a$10$9rpAF6ngYWc4lQc5QL.Fuuo5Q2y5xHw69CD7l6P1Yh8/k.LjfQVka",
+    "createdAt": "2025-08-24T07:56:59.080Z",
+    "isOnline": true
+  },
+  {
+    "id": "5d174aaa-e446-4d89-9523-685694d96f6b",
+    "username": "EEG",
+    "email": "eeg@ms.com",
+    "password": "$2a$10$bsrPjPfVs8u11paus/1wIu77k05z.dL0MPkZ437fyjXD7TEmtkOGW",
+    "createdAt": "2025-08-24T08:24:13.297Z",
+    "isOnline": true
+  }
+]

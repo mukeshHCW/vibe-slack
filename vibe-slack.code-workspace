@@ -1,0 +1,30 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "typescript.preferences.includePackageJsonAutoImports": "off",
+    "typescript.suggest.autoImports": false,
+    "eslint.workingDirectories": ["client", "server"],
+    "eslint.options": {
+      "ignore": true,
+      "ignorePath": ".eslintignore"
+    },
+    "files.associations": {
+      "tsconfig.json": "jsonc",
+      "tsconfig.*.json": "jsonc"
+    },
+    "json.validate.enable": false,
+    "typescript.validate.enable": true,
+    "typescript.preferences.quotStyle": "single"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-eslint"
+    ]
+  }
+}

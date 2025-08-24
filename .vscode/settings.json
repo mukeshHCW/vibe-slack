@@ -1,0 +1,24 @@
+{
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": false,
+  "eslint.workingDirectories": ["client", "server"],
+  "files.associations": {
+    "tsconfig.json": "jsonc",
+    "tsconfig.*.json": "jsonc"
+  },
+  "typescript.validate.enable": true,
+  "json.validate.enable": false,
+  "eslint.options": {
+    "ignore": true
+  },
+  "typescript.preferences.quotStyle": "single",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
+}

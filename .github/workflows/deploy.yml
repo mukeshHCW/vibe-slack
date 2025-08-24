@@ -1,0 +1,53 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches: [ production ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          client/package-lock.json
+          server/package-lock.json
+    
+    - name: Install and build client
+      run: |
+        cd client
+        npm ci
+        npm run build
+        
+    - name: Install server dependencies
+      run: |
+        cd server
+        npm ci --production
+        
+    - name: Deploy to Azure VM
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USERNAME }}
+        password: ${{ secrets.VM_PASSWORD }}
+        port: 22
+        script: |
+          cd C:\vibe-slack-chat
+          git fetch origin
+          git checkout production
+          git pull origin production
+          powershell.exe -File C:\Scripts\deploy-vibe-slack.ps1
+          
+    - name: Health Check
+      run: |
+        sleep 30
+        curl -f http://${{ secrets.VM_HOST }}:5000/api/health || exit 1

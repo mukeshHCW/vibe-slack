@@ -1,0 +1,20 @@
+[
+  {
+    "id": "4bcb02fc-0c87-43aa-8c26-82e020cf6a6b",
+    "name": "general",
+    "description": "General discussion",
+    "createdBy": "system",
+    "createdAt": "2025-08-24T06:54:03.602Z",
+    "members": []
+  },
+  {
+    "id": "2a9e224b-c930-4817-8679-b32c0b3015a7",
+    "name": "random",
+    "description": "Channel created by Test",
+    "createdBy": "c093e7e0-e72e-47ed-9f5d-f01579742713",
+    "createdAt": "2025-08-24T09:16:34.748Z",
+    "members": [
+      "c093e7e0-e72e-47ed-9f5d-f01579742713"
+    ]
+  }
+]

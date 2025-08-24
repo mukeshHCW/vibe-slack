@@ -1,0 +1,253 @@
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  background-color: #4a154b;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100vh;
+  border-right: 1px solid #350a36;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #3f0e40;
+}
+
+.sidebar-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.username {
+  font-size: 0.85rem;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 400;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-section {
+  margin: 1rem 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.add-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 3px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.create-channel {
+  padding: 0 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.create-channel input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+  box-sizing: border-box;
+  font-size: 0.9rem;
+}
+
+.create-channel-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.create-channel-actions button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.create-channel-actions button:first-child {
+  background: #007a5a;
+  color: white;
+  flex: 1;
+}
+
+.create-channel-actions button:first-child:hover {
+  background: #005a41;
+}
+
+.create-channel-actions button:last-child {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.create-channel-actions button:last-child:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.channel-list, .user-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.channel-list::-webkit-scrollbar, .user-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.channel-list::-webkit-scrollbar-track, .user-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.channel-list::-webkit-scrollbar-thumb, .user-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.channel-item, .user-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  border-radius: 3px;
+  margin: 0 0.5rem 0.2rem 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.channel-item-content, .user-item-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.channel-item:hover, .user-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.channel-item.active, .user-item.active {
+  background-color: #0056b3;
+  font-weight: 500;
+  color: white;
+}
+
+.channel-hash {
+  margin-right: 0.5rem;
+  opacity: 0.7;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.channel-name, .user-name {
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  background-color: #ccc;
+  border: 2px solid white;
+}
+
+.status-indicator.online {
+  background-color: #00d26a;
+}
+
+.status-indicator.away {
+  background-color: #ffb020;
+}
+
+.status-indicator.offline {
+  background-color: #ccc;
+}
+
+.no-users {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.unread-badge {
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+}
