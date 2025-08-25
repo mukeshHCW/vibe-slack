@@ -1,0 +1,9 @@
+{
+  "name": "deploy-azure-vm",
+  "version": "1.0.0",
+  "description": "Configurable deployment script for EEG Vibe Slack on Azure VM",
+  "scripts": {
+    "deploy": "node deploy-script.js",
+    "setup-azure": "node setup-azure.js"
+  }
+}

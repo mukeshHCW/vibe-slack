@@ -2,6 +2,29 @@
 echo === EEG Vibe Slack Quick Deployment ===
 echo.
 
+REM Load configuration from .env.production if available
+if exist .env.production (
+    echo Loading configuration from .env.production...
+    for /f "usebackq tokens=1,2 delims==" %%a in (".env.production") do (
+        if not "%%a"=="" if not "%%a:~0,1%%"=="#" (
+            set "%%a=%%b"
+        )
+    )
+) else (
+    echo Using default configuration...
+    set "PROD_DOMAIN=eeg-vibe-slack.eastus.cloudapp.azure.com"
+    set "PROD_VM_IP=4.157.242.240"
+    set "PROD_CLIENT_PORT=3000"
+    set "PROD_SERVER_PORT=5000"
+)
+
+echo Configuration:
+echo Domain: %PROD_DOMAIN%
+echo VM IP: %PROD_VM_IP%
+echo Client Port: %PROD_CLIENT_PORT%
+echo Server Port: %PROD_SERVER_PORT%
+echo.
+
 echo Setting execution policy...
 powershell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 
@@ -21,6 +44,17 @@ cd C:\vibe-slack
 echo Cloning repository...
 git clone https://github.com/mukeshHCW/vibe-slack.git .
 
+echo Setting up environment variables...
+echo NODE_ENV=production > .env
+echo PROD_DOMAIN=%PROD_DOMAIN% >> .env
+echo PROD_VM_IP=%PROD_VM_IP% >> .env
+echo PROD_CLIENT_PORT=%PROD_CLIENT_PORT% >> .env
+echo PROD_SERVER_PORT=%PROD_SERVER_PORT% >> .env
+
+echo Setting up client environment variables...
+echo VITE_PROD_DOMAIN=%PROD_DOMAIN% > client\.env.production
+echo VITE_PROD_SERVER_PORT=%PROD_SERVER_PORT% >> client\.env.production
+
 echo Installing server dependencies...
 cd server
 npm install --ignore-scripts
@@ -35,8 +69,8 @@ echo Installing PM2 and serve...
 npm install -g pm2 serve
 
 echo Setting up Windows Firewall rules...
-netsh advfirewall firewall add rule name="Allow Port 3000" dir=in action=allow protocol=TCP localport=3000
-netsh advfirewall firewall add rule name="Allow Port 5000" dir=in action=allow protocol=TCP localport=5000
+netsh advfirewall firewall add rule name="Allow Port %PROD_CLIENT_PORT%" dir=in action=allow protocol=TCP localport=%PROD_CLIENT_PORT%
+netsh advfirewall firewall add rule name="Allow Port %PROD_SERVER_PORT%" dir=in action=allow protocol=TCP localport=%PROD_SERVER_PORT%
 
 echo Creating initial data files...
 mkdir ..\server\data
@@ -53,16 +87,16 @@ echo Starting application...
 cd ..\server
 pm2 start index.js --name "vibe-slack-server"
 cd ..\client
-pm2 start "npx serve -s dist -p 3000" --name "vibe-slack-client"
+pm2 start "npx serve -s dist -p %PROD_CLIENT_PORT%" --name "vibe-slack-client"
 
 echo.
 echo === DEPLOYMENT COMPLETE ===
 echo Your EEG Vibe Slack app is running at:
-echo http://eeg-vibe-slack.eastus.cloudapp.azure.com:3000
-echo http://4.157.242.240:3000
+echo http://%PROD_DOMAIN%:%PROD_CLIENT_PORT%
+echo http://%PROD_VM_IP%:%PROD_CLIENT_PORT%
 echo.
 echo Server running on:
-echo http://eeg-vibe-slack.eastus.cloudapp.azure.com:5000
-echo http://4.157.242.240:5000
+echo http://%PROD_DOMAIN%:%PROD_SERVER_PORT%
+echo http://%PROD_VM_IP%:%PROD_SERVER_PORT%
 echo.
 pause

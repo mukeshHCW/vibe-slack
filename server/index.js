@@ -8,6 +8,11 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Load configuration
+const config = require('../config.js');
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const envConfig = isDevelopment ? config.development : config.production;
+
 // Add a simple mutex for read status operations
 let readStatusMutex = Promise.resolve();
 
@@ -15,21 +20,21 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"],
+    origin: envConfig.corsOrigins,
     methods: ["GET", "POST"]
   }
 });
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"],
+  origin: envConfig.corsOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 app.use(express.json());
 
 // Constants
-const JWT_SECRET = 'your-secret-key-change-in-production';
+const JWT_SECRET = config.security.jwtSecret;
 const DATA_DIR = path.join(__dirname, 'data');
 
 // Initialize data directory and files
@@ -90,38 +95,94 @@ async function initializeData() {
 
 // Helper functions for data operations
 async function readJsonFile(filename) {
+  const filePath = path.join(DATA_DIR, filename);
+  
   try {
-    const data = await fs.readFile(path.join(DATA_DIR, filename), 'utf8');
+    const data = await fs.readFile(filePath, 'utf8');
     if (!data.trim()) {
       console.log(`${filename} is empty, returning default array`);
       return [];
     }
+    
+    // Try to parse JSON
     return JSON.parse(data);
   } catch (error) {
     console.error(`Error reading ${filename}:`, error);
     
-    // For user_read_status.json, try to return existing data if possible
-    if (filename === 'user_read_status.json') {
+    // If JSON is corrupted, create a backup and recreate the file
+    if (error instanceof SyntaxError) {
+      console.log(`JSON syntax error in ${filename}, attempting to recover...`);
+      
       try {
-        // Try to read the file again to see if it was a temporary issue
-        const data = await fs.readFile(path.join(DATA_DIR, filename), 'utf8');
-        return JSON.parse(data);
-      } catch (secondError) {
-        console.error(`Second attempt to read ${filename} failed:`, secondError);
+        // Create backup of corrupted file
+        const backupPath = path.join(DATA_DIR, `${filename}.backup.${Date.now()}`);
+        const corruptedData = await fs.readFile(filePath, 'utf8');
+        await fs.writeFile(backupPath, corruptedData);
+        console.log(`Corrupted ${filename} backed up to ${backupPath}`);
+        
+        // Initialize with appropriate default data
+        let defaultData = [];
+        if (filename === 'channels.json') {
+          defaultData = [
+            {
+              id: uuidv4(),
+              name: 'general',
+              description: 'General discussion',
+              createdBy: 'system',
+              createdAt: new Date().toISOString(),
+              members: []
+            }
+          ];
+        }
+        
+        await writeJsonFile(filename, defaultData);
+        console.log(`${filename} recreated with default data`);
+        return defaultData;
+      } catch (recoveryError) {
+        console.error(`Failed to recover ${filename}:`, recoveryError);
         return [];
       }
     }
-    return [];
+    
+    // For other errors, try one more time
+    try {
+      const data = await fs.readFile(filePath, 'utf8');
+      return JSON.parse(data);
+    } catch (secondError) {
+      console.error(`Second attempt to read ${filename} failed:`, secondError);
+      return [];
+    }
   }
 }
 
 async function writeJsonFile(filename, data) {
+  const filePath = path.join(DATA_DIR, filename);
+  const tempFilePath = `${filePath}.tmp`;
+  
   try {
+    // Validate data can be stringified
     const jsonString = JSON.stringify(data, null, 2);
-    await fs.writeFile(path.join(DATA_DIR, filename), jsonString, 'utf8');
+    
+    // Write to temporary file first
+    await fs.writeFile(tempFilePath, jsonString, 'utf8');
+    
+    // Verify the temporary file can be read back correctly
+    const verifyData = await fs.readFile(tempFilePath, 'utf8');
+    JSON.parse(verifyData); // This will throw if invalid
+    
+    // If verification passes, replace the original file
+    await fs.rename(tempFilePath, filePath);
     console.log(`Successfully wrote ${filename}`);
   } catch (error) {
     console.error(`Error writing ${filename}:`, error);
+    
+    // Clean up temporary file if it exists
+    try {
+      await fs.unlink(tempFilePath);
+    } catch (cleanupError) {
+      // Ignore cleanup errors
+    }
+    
     throw error; // Re-throw to handle in calling function
   }
 }
@@ -672,8 +733,10 @@ function getConnectedUsers() {
 
 // Initialize data and start server
 initializeData().then(() => {
-  const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || config.ports.server;
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${isDevelopment ? 'development' : 'production'}`);
+    console.log(`CORS origins: ${envConfig.corsOrigins.join(', ')}`);
   });
 });
